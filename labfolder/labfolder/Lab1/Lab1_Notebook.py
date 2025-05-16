@@ -1,13 +1,13 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC ### Data Extraction Notebook
-# MAGIC This notebook is designed to connect to the Redshift cluster and extract users table data in parquet format and store the data in an S3 bucket.
+# MAGIC This notebook is designed to connect to the Redshift cluster and extract users' table data in Parquet format and store the data in an Amazon S3 bucket.
 # MAGIC
-# MAGIC Once the the data has been loaded a Delta table will be created in the students scehma under the classroom catalog in Unity Catalog
+# MAGIC Once the data has been loaded, a Delta table will be created in the student's schema under the classroom catalog in Unity Catalog.
 # MAGIC
-# MAGIC The user and password for the RedShift table is stored and retrived from a secret in AWS Secrets Manager.
+# MAGIC The user and password for the Redshift table is stored and retrieved from a secret in AWS Secrets Manager.
 # MAGIC
-# MAGIC This lab will use the JDBC driver for Redshift.  The Redshift cluster is accessible via a public internet address via an AWS Elastic IP address.  Alternatively we could have connected via Private link from the Databricks private subnet to the Redshift private subnet.
+# MAGIC This lab will use the JDBC driver for Redshift. The Redshift cluster is accessible via a public internet address via an AWS Elastic IP address. Alternatively, we could have connected via Private link from the Databricks private subnet to the Redshift private subnet.
 # MAGIC
 # MAGIC Federated access would have also been an alternative to JDBC.
 # MAGIC
@@ -16,7 +16,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Install the required python libraries and restart the kernel for the packages to be available.
+# MAGIC Install the required Python libraries and restart the kernel for the packages to be available.
 
 # COMMAND ----------
 
@@ -27,7 +27,7 @@ dbutils.library.restartPython()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC The following cells are designed to make a different schema under the classroom catalog for each student.   Since the student id is likely to be an email address the following will replace expected special characters in email addresses with underscores. 
+# MAGIC The following cells are designed to make a different schema under the classroom catalog for each student. Since the student id is likely to be an email address, the following will replace expected special characters in email addresses with underscores. 
 # MAGIC
 # MAGIC This is for LAB purposes only.
 
@@ -41,7 +41,7 @@ user_email = dbutils.notebook.entry_point.getDbutils().notebook().getContext().u
 # Extract the portion before the @
 safe_user = user_email.split('@')[0]
 
-# Optionally sanitize the username (e.g., replace dots)
+# Optionally, sanitize the username (e.g., replace dots)
 safe_user = safe_user.replace('.', '_')
 
 print(f"Original user: {user_email}")
@@ -81,7 +81,7 @@ print(f"Current schema: {schema}")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Further setting environment varables for this LAB for the AWS configuaryion of our sample Redshift cluster
+# MAGIC Further setting environment varables for this LAB for the AWS configuration of our sample Redshift cluster.
 
 # COMMAND ----------
 
@@ -97,7 +97,7 @@ iam_role = "arn:aws:iam::633690268896:role/service-role/AmazonRedshift-CommandsA
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Dropping our LAB table if it exists for lab consistency.  In a production scenario you would likely not drop the table each time.  
+# MAGIC Dropping our LAB table, if it exists, for lab consistency. In a production scenario, you would likely not drop the table each time.  
 
 # COMMAND ----------
 
@@ -130,7 +130,7 @@ spark.sql(sql_query)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC For LAB purposes the following cell is verifying that this notebook and associated compute have the correct IAM permissions to access the S3 bucket that will be used for the UNLOAD operation.
+# MAGIC For LAB purposes, the following cell is verifying that this notebook and associated compute have the correct IAM permissions to access the Amazon S3 bucket that will be used for the UNLOAD operation.
 
 # COMMAND ----------
 
@@ -169,7 +169,7 @@ print(result.stdout)
 # MAGIC - 
 # MAGIC - Use [JDBC secrets](https://docs.databricks.com/user-guide/secrets/example-secret-workflow.html#example-secret-workflow) to set up your Redshift credentials (`redshift-password`, and `redshift-iam_role`), which will be used in the following `get_table()` function (e.g. `databricks secrets put --scope rd-jdbc --key redshift-password`)
 # MAGIC
-# MAGIC We have the username and password stored as AWS secrets which we well extract below.
+# MAGIC We have the username and password stored as AWS secrets which we will extract below.
 
 # COMMAND ----------
 
@@ -223,7 +223,7 @@ rs_username, rs_password = get_secret()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC The {safe_user} variable was derived from the username of the current user. It is used to create a unique directory in the S3 bucket for this user's data.
+# MAGIC The {safe_user} variable was derived from the username of the current user. It is used to create a unique directory in the Amazon S3 bucket for this user's data.
 # MAGIC
 # MAGIC You can ignore the message "SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder"" and "SLF4J: Defaulting to no-operation (NOP) logger implementation" if you see them. They are related to the logging library used by the JDBC driver and can be safely ignored.
 
@@ -312,13 +312,13 @@ finally:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Verify that the data was unloaded to S3 bucket for this user as parquet files
+# MAGIC Verify that the data was unloaded to Amazon S3 bucket for this user as Parquet files.
 
 # COMMAND ----------
 
 import boto3
 
-# Initialize the S3 client
+# Initialize the Amazon S3 client
 region = "us-east-1"  # Replace with your region
 s3 = boto3.client('s3', region_name=region)
 
@@ -341,7 +341,7 @@ else:
 
 import boto3
 
-# Initialize the S3 client
+# Initialize the Amazon S3 client
 region = "us-east-1"  # Replace with your region
 s3 = boto3.client('s3', region_name=region)
 
@@ -363,7 +363,7 @@ else:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC The following cell is used to determine what the existing schema is for the Redshift table.  This information than is used to define the schema for the target Delta table in Databricks Unity Catalog
+# MAGIC The following cell is used to determine what the existing schema is for the Redshift table. This information then is used to define the schema for the target Delta table in Databricks Unity Catalog.
 
 # COMMAND ----------
 
@@ -473,7 +473,7 @@ finally:
 
 # MAGIC %md
 # MAGIC
-# MAGIC Datbricks and Redshift support many of the same datatypes but have different syntax for defining each.  In the case where there may not be supported data types in Databricks either ETL or SQL processing (cast) maybe be required before or during data loading.
+# MAGIC Databricks and Redshift support many of the same datatypes but have different syntax for defining each. In the case where there may not be supported data types in Databricks, either ETL or SQL processing (cast) maybe be required before or during data loading.
 # MAGIC
 # MAGIC https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-datatypes
 
@@ -563,15 +563,15 @@ except Exception as e:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Here we are using the Databricks Copy INTO command to load the data from S3 into the Delta table.
+# MAGIC Here we are using the Databricks Copy INTO command to load the data from Amazon S3 into the Delta table.
 # MAGIC
-# MAGIC Other data formats are supported but a comman datatype for this scenario is parquet.
+# MAGIC Other data formats are supported but a comman datatype for this scenario is Parquet.
 # MAGIC
 # MAGIC Read more about this command here:
 # MAGIC
 # MAGIC https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/copy-into/
 # MAGIC
-# MAGIC Notice that spark jobs are created to run processing in parrallel.
+# MAGIC Notice that spark jobs are created to run processing in parallel.
 
 # COMMAND ----------
 
@@ -610,7 +610,7 @@ spark.sql(sql_query)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Quick check to see if the tables loaded successfully
+# MAGIC Quick check to see if the tables loaded successfully.
 
 # COMMAND ----------
 
@@ -647,7 +647,7 @@ results_df.show()
 # MAGIC %md
 # MAGIC ## Converting Stored Procedures and Functions
 # MAGIC
-# MAGIC There are many different options when deciding how you might want to convert any Redshift stored procedures and functions, a few options are demonstrated below
+# MAGIC There are many different options when deciding how you might want to convert any Redshift stored procedures and functions, a few options are demonstrated below.
 
 # COMMAND ----------
 
@@ -718,7 +718,7 @@ results_df = spark.sql(sql_query)
 
 # MAGIC
 # MAGIC %md
-# MAGIC ## RedShift Create Stored Procedure
+# MAGIC ## Redshift Create Stored Procedure
 # MAGIC ![Distribution](./images/createsqlless.png)
 
 # COMMAND ----------
