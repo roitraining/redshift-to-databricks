@@ -19,7 +19,7 @@
 # MAGIC Enter your Redshift credentials using secrets and Run the entire notebook!
 # MAGIC
 # MAGIC > **Note:** <br>
-# MAGIC > By default, Redshift system tables save the past 5-7 days' worth of data. To get a more accurate report of your Redshift usage, run a periodic data dump of your system tables to S3.
+# MAGIC > By default, Redshift system tables save the past 5-7 days' worth of data. To get a more accurate report of your Redshift usage, run a periodic data dump of your system tables to Amazon S3.
 # MAGIC > Need Read Access to the following tables:
 # MAGIC - stl_query
 # MAGIC - stl_query_metrics
@@ -35,14 +35,14 @@
 # MAGIC - pg_catalog.pg_proc
 # MAGIC - pg_catalog.pg_user
 # MAGIC
-# MAGIC Redshift attached IAM role needs to have read/write access to the S3 bucket where the temp directory is located for unload data from Redshift.
+# MAGIC Redshift attached IAM role needs to have read/write access to the Amazon S3 bucket where the temp directory is located for unload data from Redshift.
 # MAGIC
-# MAGIC Spark cluster attached instance profile needs to have read access to the S3 bucket where the temp directory is located and cloudwatch:GetMetricStatistics permission.
+# MAGIC Spark cluster attached instance profile needs to have read access to the Amazon S3 bucket where the temp directory is located and cloudwatch:GetMetricStatistics permission.
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC The following cells are designed to make a different schema under the classroom catalog for each student.   Since the student id is likely to be an email address the following will replace expected special characters in email addresses with underscores. 
+# MAGIC The following cells are designed to make a different schema under the classroom catalog for each student. Since the student id is likely to be an email address, the following will replace expected special characters in email addresses with underscores. 
 # MAGIC
 # MAGIC This is for LAB purposes only.
 
@@ -93,7 +93,7 @@ iam_role = "arn:aws:iam::633690268896:role/service-role/AmazonRedshift-CommandsA
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC For LAB purposes the following cell is verifying that this notebook and associated compute have the correct IAM permissions to access the S3 bucket that will be used for the profile processing steps.
+# MAGIC For LAB purposes the following cell is verifying that this notebook and associated compute have the correct IAM permissions to access the Amazon S3 bucket that will be used for the profile processing steps.
 # MAGIC
 # MAGIC The prefix is different for each user based on your user id.
 
@@ -133,7 +133,7 @@ print(result.stdout)
 # MAGIC - 
 # MAGIC - Use [JDBC secrets](https://docs.databricks.com/user-guide/secrets/example-secret-workflow.html#example-secret-workflow) to set up your Redshift credentials (`redshift-password`, and `redshift-iam_role`), which will be used in the following `get_table()` function (e.g. `databricks secrets put --scope rd-jdbc --key redshift-password`)
 # MAGIC
-# MAGIC We have the username and password stored as AWS secrets which we well extract below.
+# MAGIC We have the username and password stored as AWS secrets which we will extract below.
 
 # COMMAND ----------
 
@@ -178,15 +178,15 @@ rs_username, rs_password = get_secret()
 
 # MAGIC %md
 # MAGIC
-# MAGIC #### Create schema to store tables created by the profiler tasks
+# MAGIC #### Create schema to store tables created by the profiler tasks.
 # MAGIC
-# MAGIC - For LAB purposes the following cell is verifying that this notebook and associated compute have the correct IAM permissions to access the S3 bucket that will be used for the profile processing steps.
+# MAGIC - For LAB purposes the following cell is verifying that this notebook and associated compute have the correct IAM permissions to access the Amazon S3 bucket that will be used for the profile processing steps.
 # MAGIC
 # MAGIC The schema is different for each user based on your user id.
 # MAGIC
 # MAGIC Example:  redshift_profiler_run_someuser_outlook_com_1747151082
 # MAGIC
-# MAGIC Note: Since a timestamp is appended at the end, running this notebook will create a new schema and new table
+# MAGIC Note: Since a timestamp is appended at the end, running this notebook will create a new schema and new table.
 # MAGIC
 
 # COMMAND ----------
@@ -206,7 +206,7 @@ spark.sql(f"use {redshift_profiler_schema}")
 
 # COMMAND ----------
 
-#get the Reshift metrics tables with this function
+#get the Redshift metrics tables with this function
 from pyspark.sql.functions import col
 from pyspark.sql.types import StringType
 
@@ -506,9 +506,9 @@ where
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ###  Use Boto3 (python sdk) to gather systems metrics from AWS service API's
+# MAGIC ###  Use Boto3 (python sdk) to gather systems metrics from AWS service APIs
 # MAGIC
-# MAGIC Create client connection to AWS cloudwatch service
+# MAGIC Create client connection to AWS CloudWatch service
 
 # COMMAND ----------
 
@@ -579,7 +579,7 @@ all_cpu_df.write.mode("overwrite").saveAsTable("cluster_cpu_utlization")
 # MAGIC %md
 # MAGIC ## Spectrum Utilization
 # MAGIC
-# MAGIC Redshift Spectrum is a feature of Amazon Redshift, a cloud data warehouse service, that allows you to query data stored in Amazon S3 (simple storage service) using SQL. It enables you to analyze large datasets in S3 without the need to load the data into the Redshift cluster. 
+# MAGIC Redshift Spectrum is a feature of Amazon Redshift, a cloud data warehouse service, that allows you to query data stored in Amazon S3 (simple storage service) using SQL. It enables you to analyze large datasets in Amazon S3 without the need to load the data into the Redshift cluster. 
 
 # COMMAND ----------
 
@@ -598,7 +598,7 @@ group by 1
 # MAGIC %md
 # MAGIC ## Concurrency Scaling Utilization
 # MAGIC
-# MAGIC In Amazon Redshift, Concurrency Scaling is a feature that automatically and elastically scales query processing power to handle increases in concurrent queries
+# MAGIC In Amazon Redshift, Concurrency Scaling is a feature that automatically and elastically scales query processing power to handle increases in concurrent queries.
 
 # COMMAND ----------
 
@@ -693,7 +693,7 @@ get_table("stl_query")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Read more about instance type comparisons here -  Not something you would consider for migration from RedShift
+# MAGIC Read more about instance type comparisons here. Not something you would consider for migration from Redshift.
 # MAGIC
 # MAGIC https://aws.amazon.com/blogs/apn/amazon-redshift-benchmarking-comparison-of-ra3-vs-ds2-instance-types/
 
@@ -1021,7 +1021,7 @@ get_table("stl_query")
 # MAGIC
 # MAGIC # System Utilization
 # MAGIC
-# MAGIC The following two queries break down total Redshift CPU usage 
+# MAGIC The following two queries break down total Redshift CPU usage.
 
 # COMMAND ----------
 
@@ -1340,7 +1340,7 @@ print("✅ Table list complete.")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Purposely failing the notebook in case the students want to review the tables that were created by the profiler
+# MAGIC ## Purposely failing the notebook in case the students want to review the tables that were created by the profiler.
 
 # COMMAND ----------
 
@@ -1349,7 +1349,7 @@ Purposely stop notebook
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # After revieing the tables in the catalog, we can delete the tables
+# MAGIC # After revieing the tables in the catalog, we can delete the tables.
 
 # COMMAND ----------
 
